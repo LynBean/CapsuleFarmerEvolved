@@ -7,6 +7,7 @@
 <a href="https://github.com/LeagueOfPoro/CapsuleFarmerEvolved/stargazers"><img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/LeagueOfPoro/CapsuleFarmerEvolved"></a>
 <a href="https://github.com/LeagueOfPoro/CapsuleFarmerEvolved/issues?q=is%3Aissue+is%3Aclosed"><img alt="GitHub closed issues" src="https://img.shields.io/github/issues-closed/LeagueOfPoro/CapsuleFarmerEvolved"></a>
 <a href="https://github.com/LeagueOfPoro/CapsuleFarmerEvolved"><img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/LeagueOfPoro/CapsuleFarmerEvolved"></a>
+<a href="https://github.com/LynBean/CapsuleFarmerEvolved/actions/workflows/docker-image.yml"><img alt="Docker Image CI" src="https://github.com/LynBean/CapsuleFarmerEvolved/actions/workflows/docker-image.yml/badge.svg?branch=develop"></a>
 </p>
 
 Are you tired of watching professional League of Legends games? Do you watch only for the drops? This is a revolution in the farming of League of Legends Esports capsules!
@@ -21,7 +22,8 @@ This is a successor to the old [EsportsCapsuleFarmer](https://github.com/LeagueO
 2. [Community](#community)
 3. [Notes](#notes)
 4. [Configuration](https://github.com/LeagueOfPoro/CapsuleFarmerEvolved/wiki/Configuration)
-5. [Installation](https://github.com/LeagueOfPoro/CapsuleFarmerEvolved/wiki)
+
+5. [Installation **The following instruction might not be working. This repository contained modified scripts**](https://github.com/LeagueOfPoro/CapsuleFarmerEvolved/wiki)
     - [Windows](https://github.com/LeagueOfPoro/CapsuleFarmerEvolved/wiki/Advanced-Installation-for-Windows)
     - [Linux](https://github.com/LeagueOfPoro/CapsuleFarmerEvolved/wiki/Advanced-Installation-for-Linux)
     - [Docker](https://github.com/LeagueOfPoro/CapsuleFarmerEvolved/wiki/Advanced-Installation-for-Docker)
