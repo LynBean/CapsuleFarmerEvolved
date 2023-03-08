@@ -1,13 +1,13 @@
-from datetime import datetime, timezone, timedelta
+
+from .AssertCondition import AssertCondition
+from .Config import Config
+from .Exceptions import StatusCodeAssertException
+from .Match import Match
+from .SharedData import SharedData
+from datetime import datetime, timedelta, timezone
 from threading import Thread
 from time import sleep
 import cloudscraper
-
-from AssertCondition import AssertCondition
-from Config import Config
-from Exceptions.StatusCodeAssertException import StatusCodeAssertException
-from Match import Match
-from SharedData import SharedData
 
 
 class DataProviderThread(Thread):
@@ -28,7 +28,8 @@ class DataProviderThread(Thread):
                 'platform': 'windows',
                 'desktop': True
             },
-            debug=False)
+            debug=False
+        )
         self.currentTime = None
         self.startTime = None
 
@@ -38,6 +39,7 @@ class DataProviderThread(Thread):
                 self.fetchLiveMatches()
                 self.fetchTimeUntilNextMatch()
                 sleep(DataProviderThread.DEFAULT_SLEEP_DURATION)
+
             except:
                 self.log.error("RIP")
 
@@ -45,31 +47,44 @@ class DataProviderThread(Thread):
         """
         Retrieve data about currently live matches and store them.
         """
-        headers = {"Origin": "https://lolesports.com", "Referrer": "https://lolesports.com",
-                   "x-api-key": Config.RIOT_API_KEY}
+        headers = {
+            "Origin": "https://lolesports.com",
+            "Referrer": "https://lolesports.com",
+            "x-api-key": Config.RIOT_API_KEY
+        }
         res = self.client.get(
-            "https://esports-api.lolesports.com/persisted/gw/getLive?hl=en-GB", headers=headers)
+            "https://esports-api.lolesports.com/persisted/gw/getLive?hl=en-GB",
+            headers=headers
+        )
         AssertCondition.statusCodeMatches(200, res)
         resJson = res.json()
         res.close()
         liveMatches = {}
+
         try:
             events = resJson["data"]["schedule"].get("events", [])
             for event in events:
                 tournamentId = event["tournament"]["id"]
+
                 if tournamentId not in liveMatches:
                     league = event["league"]["name"]
+
                     if len(event["streams"]) > 0:
                         streamChannel = event["streams"][0]["parameter"]
                         streamSource = event["streams"][0]["provider"]
+
                         for stream in event["streams"]:
+
                             if stream["parameter"] in self.config.bestStreams:
                                 streamChannel = stream["parameter"]
                                 streamSource = stream["provider"]
                                 break
+
                         liveMatches[tournamentId] = Match(
-                            tournamentId, league, streamChannel, streamSource)
+                            tournamentId, league, streamChannel, streamSource
+                        )
             self.sharedData.setLiveMatches(liveMatches)
+
         except (KeyError, TypeError):
             self.sharedData.setLiveMatches()
             self.log.error("Could not get live matches")
@@ -78,17 +93,24 @@ class DataProviderThread(Thread):
         """
         Retrieve data about currently live matches and store them.
         """
-        headers = {"Origin": "https://lolesports.com", "Referrer": "https://lolesports.com",
-                   "x-api-key": Config.RIOT_API_KEY}
+        headers = {
+            "Origin": "https://lolesports.com",
+            "Referrer": "https://lolesports.com",
+            "x-api-key": Config.RIOT_API_KEY
+        }
         try:
             res = self.client.get(
-                "https://esports-api.lolesports.com/persisted/gw/getSchedule?hl=en-GB", headers=headers)
+                "https://esports-api.lolesports.com/persisted/gw/getSchedule?hl=en-GB",
+                headers=headers
+            )
             AssertCondition.statusCodeMatches(200, res)
             resJson = res.json()
             res.close()
             events = resJson["data"]["schedule"]["events"]
+
             for event in events:
                 if event["state"] == "unstarted":
+
                     if self._isStartTimeLater(event["startTime"]):  # startTime is later
                         timeDiff = self._calculateTimeDifference(event["startTime"])
                         systemTimeDT = self._getSystemTime()
@@ -98,13 +120,17 @@ class DataProviderThread(Thread):
 
                         niceStartTime = datetime.strftime(startTime, '%H:%M')
                         self.sharedData.setTimeUntilNextMatch(
-                            f"Up next: {event['league']['name']} at {niceStartTime}")
+                            f"Up next: {event['league']['name']} at {niceStartTime}"
+                        )
                         break
+
                     else:  # We're past the startTime due to delay or cancellation i'm guessing
                         continue  # Continue for loop to find next 'unstarted' event
+
         except StatusCodeAssertException as ex:
             self.log.error(ex)
             self.sharedData.setTimeUntilNextMatch("None")
+
         except Exception as ex:
             self.log.error(ex)
             self.sharedData.setTimeUntilNextMatch("None")
@@ -147,4 +173,3 @@ class DataProviderThread(Thread):
         systemTimeStr = datetime.now().strftime(datetimeFormat)
         systemTimeDT = datetime.strptime(systemTimeStr, datetimeFormat)
         return systemTimeDT
-        

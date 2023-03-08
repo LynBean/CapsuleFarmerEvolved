@@ -1,0 +1,8 @@
+beautifulsoup4
+cloudscraper
+httpx
+imaplib2
+pyjwt
+pyyaml
+requests
+rich

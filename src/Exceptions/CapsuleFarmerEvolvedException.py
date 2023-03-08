@@ -1,2 +1,3 @@
+
 class CapsuleFarmerEvolvedException(Exception):
     pass

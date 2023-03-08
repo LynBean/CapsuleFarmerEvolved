@@ -1,11 +1,13 @@
-import logging
+
+from .Utils import makePath
 from logging.handlers import RotatingFileHandler
+import logging
 
 FILE_SIZE = 1024 * 1024 * 100  # 100 MB
 BACKUP_COUNT = 5  # keep up to 5 files
 
-
 class Logger:
+
     @staticmethod
     def createLogger(debug: bool, version: float):
         if debug:
@@ -14,7 +16,7 @@ class Logger:
             level = logging.WARNING
 
         fileHandler = RotatingFileHandler(
-            "./logs/capsulefarmer.log",
+            str(makePath("logs/capsulefarmer.log")),
             mode="a+",
             maxBytes=FILE_SIZE,
             backupCount=BACKUP_COUNT,
@@ -26,8 +28,6 @@ class Logger:
             level=level,
             handlers=[fileHandler],
         )
+
         log = logging.getLogger("League of Poro")
-        log.info("-------------------------------------------------")
-        log.info(f"----------- Program started  v{version} ---------------")
-        log.info("-------------------------------------------------")
         return log

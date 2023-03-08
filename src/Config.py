@@ -1,10 +1,12 @@
-import yaml, requests
-from yaml.parser import ParserError
-from rich import print
+
+from .Exceptions import InvalidCredentialsException
+from .Utils import isDocker, makePath
 from pathlib import Path
-
-from Exceptions.InvalidCredentialsException import InvalidCredentialsException
-
+from rich import print
+from time import sleep
+from yaml.parser import ParserError
+import requests
+import yaml
 
 class Config:
     """
@@ -20,49 +22,72 @@ class Config:
 
         :param configPath: string, path to the configuration file
         """
-        
+
         self.accounts = {}
         try:
             configPath = self.__findConfig(configPath)
+
             with open(configPath, "r", encoding='utf-8') as f:
                 config = yaml.safe_load(f)
                 accs = config.get("accounts")
+
                 for account in accs:
                      if "username" != accs[account]["username"]:
                         self.accounts[account] = {
-                        #Orig data
-                        "username": accs[account]["username"],
-                        "password": accs[account]["password"],
-                        
-                        #IMAP data
-                        "imapUsername": accs[account].get("imapUsername", ""),
-                        "imapPassword": accs[account].get("imapPassword", ""),
-                        "imapServer": accs[account].get("imapServer", ""),
+                            #Orig data
+                            "username": accs[account]["username"],
+                            "password": accs[account]["password"],
+
+                            #IMAP data
+                            "imapUsername": accs[account].get("imapUsername", ""),
+                            "imapPassword": accs[account].get("imapPassword", ""),
+                            "imapServer": accs[account].get("imapServer", ""),
                         }
+
                 if not self.accounts:
-                    raise InvalidCredentialsException                    
+                    raise InvalidCredentialsException
+
                 self.debug = config.get("debug", False)
                 self.connectorDrops = config.get("connectorDropsUrl", "")
                 self.showHistoricalDrops = config.get("showHistoricalDrops", True)
+
         except FileNotFoundError as ex:
-            print(f"[red]CRITICAL ERROR: The configuration file cannot be found at {configPath}\nHave you extacted the ZIP archive and edited the configuration file?")
+            if isDocker():
+                self.__generateConfig()
+                print(f"[red]CRITICAL ERROR: The new configuration file has been generated at {configPath}\nPlease, edit it and restart the container.")
+                sleep(1000)
+
+            else:
+                print(f"[red]CRITICAL ERROR: The configuration file cannot be found at {configPath}\nHave you extacted the ZIP archive and edited the configuration file?")
+
             print("Press any key to exit...")
             input()
             raise ex
+
         except (ParserError, KeyError) as ex:
             print(f"[red]CRITICAL ERROR: The configuration file does not have a valid format.\nPlease, check it for extra spaces and other characters.\nAlternatively, use confighelper.html to generate a new one.")
             print("Press any key to exit...")
             input()
             raise ex
+
         except InvalidCredentialsException as ex:
-            print(f"[red]CRITICAL ERROR: There are only default credentials in the configuration file.\nYou need to add you Riot account login to config.yaml to receive drops.")
+            if isDocker():
+                self.__generateConfig()
+                print(f"[red]CRITICAL ERROR: The new configuration file has been generated at {configPath}\nPlease, edit it and restart the container.")
+                sleep(1000)
+
+            else:
+                print(f"[red]CRITICAL ERROR: There are only default credentials in the configuration file.\nYou need to add you Riot account login to config.yaml to receive drops.")
+
             print("Press any key to exit...")
             input()
             raise ex
+
         try:
             remoteBestStreamsFile = requests.get(self.REMOTE_BEST_STREAMS_URL)
             if remoteBestStreamsFile.status_code == 200:
                 self.bestStreams = remoteBestStreamsFile.text.split()
+
         except Exception as ex:
             print(f"[red]CRITICAL ERROR: Beststreams couldn't be loaded. Are you connected to the internet?")
             print("Press any key to exit...")
@@ -77,7 +102,7 @@ class Config:
         :return: dictionary, account information
         """
         return self.accounts[account]
-    
+
     def __findConfig(self, configPath):
         """
         Try to find configuartion file in alternative locations.
@@ -85,12 +110,36 @@ class Config:
         :param configPath: user suplied configuartion file path
         :return: pathlib.Path, path to the configuration file
         """
-        configPath = Path(configPath)
+        configPath = makePath(configPath)
         if configPath.exists():
             return configPath
-        if Path("../config/config.yaml").exists():
-            return Path("../config/config.yaml")
-        if Path("config/config.yaml").exists():
-            return Path("config/config.yaml")
-        
+
+        tempPath = makePath("../config/config.yaml")
+        if tempPath.exists():
+            return tempPath
+
+        tempPath = makePath("config/config.yaml")
+        if tempPath.exists():
+            return tempPath
+
         return configPath
+
+    def __generateConfig(self):
+        """
+        Generate default configuration file.
+        """
+        try:
+            response = requests.get(
+                "https://raw.githubusercontent.com/LynBean/CapsuleFarmerEvolved/develop/config/config.yaml",
+                stream=True
+            )
+
+            with open(str(makePath("config.yaml")), "wb") as f:
+                for chunk in response.iter_content(chunk_size=8192):
+                    f.write(chunk)
+
+        except Exception as ex:
+            print(f"[red]CRITICAL ERROR: Default configuration file couldn't be generated. Are you connected to the internet?")
+            print("Press any key to exit...")
+            input()
+            raise ex

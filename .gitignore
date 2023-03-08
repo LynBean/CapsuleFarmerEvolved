@@ -1,6 +1,11 @@
 chromedriver
 
-# macOS 
+# Draft files
+CapsuleFarmerEvolved
+data
+.vscode
+
+# macOS
 .DS_Store
 
 # Sensitive configs

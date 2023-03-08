@@ -1,4 +1,5 @@
-from Exceptions.CapsuleFarmerEvolvedException import CapsuleFarmerEvolvedException
+
+from .CapsuleFarmerEvolvedException import CapsuleFarmerEvolvedException
 
 class InvalidIMAPCredentialsException(CapsuleFarmerEvolvedException):
     def __init__(self):

@@ -1,0 +1,14 @@
+version: "3.9"
+
+services:
+
+  capsulefarmerevolved:
+
+    container_name: capsulefarmerevolved
+
+    image: ghcr.io/lynbean/capsulefarmerevolved:latest
+
+    restart: always
+
+    volumes:
+      - ./CapsuleFarmerEvolved:/kim/data

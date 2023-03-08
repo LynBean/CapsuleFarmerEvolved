@@ -1,8 +1,9 @@
-from threading import Thread
-from time import sleep
+
+from rich.console import Console
 from rich.live import Live
 from rich.table import Table
-from rich.console import Console
+from threading import Thread
+from time import sleep
 
 class GuiThread(Thread):
     """
@@ -22,7 +23,7 @@ class GuiThread(Thread):
         self.config = config
         self.stats = stats
         self.locks = locks
-    
+
     def generateTable(self):
         table = Table()
         table.add_column("Account")
@@ -36,10 +37,27 @@ class GuiThread(Thread):
 
         for acc in self.stats.accountData:
             status = self.stats.accountData[acc]["status"]
+
             if self.config.showHistoricalDrops:
-                table.add_row(f"{acc}", f"{status}", f"{self.stats.accountData[acc]['liveMatches']}", f"{self.stats.accountData[acc]['lastCheck']}", f"{self.stats.accountData[acc]['lastDrop']}", f"{self.stats.accountData[acc]['sessionDrops']}", f"{self.stats.accountData[acc]['totalDrops']}")
+                table.add_row(
+                    f"{acc}",
+                    f"{status}",
+                    f"{self.stats.accountData[acc]['liveMatches']}",
+                    f"{self.stats.accountData[acc]['lastCheck']}",
+                    f"{self.stats.accountData[acc]['lastDrop']}",
+                    f"{self.stats.accountData[acc]['sessionDrops']}",
+                    f"{self.stats.accountData[acc]['totalDrops']}"
+                )
+
             else:
-                table.add_row(f"{acc}", f"{status}", f"{self.stats.accountData[acc]['liveMatches']}", f"{self.stats.accountData[acc]['lastCheck']}", f"{self.stats.accountData[acc]['lastDrop']}", f"{self.stats.accountData[acc]['sessionDrops']}")
+                table.add_row(
+                    f"{acc}",
+                    f"{status}",
+                    f"{self.stats.accountData[acc]['liveMatches']}",
+                    f"{self.stats.accountData[acc]['lastCheck']}",
+                    f"{self.stats.accountData[acc]['lastDrop']}",
+                    f"{self.stats.accountData[acc]['sessionDrops']}"
+                )
 
         return table
 
@@ -54,9 +72,10 @@ class GuiThread(Thread):
                 sleep(1)
                 self.locks["refreshLock"].acquire()
                 live.refresh()
+
                 if self.locks["refreshLock"].locked():
                     self.locks["refreshLock"].release()
-                
+
     def stop(self):
         """
         Try to stop gracefully

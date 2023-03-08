@@ -1,4 +1,5 @@
-from Exceptions.CapsuleFarmerEvolvedException import CapsuleFarmerEvolvedException
+
+from .CapsuleFarmerEvolvedException import CapsuleFarmerEvolvedException
 
 class Fail2FAException(CapsuleFarmerEvolvedException):
     def __init__(self):
